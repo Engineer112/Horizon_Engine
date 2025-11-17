@@ -23,5 +23,5 @@ namespace Horizon::Bits {
 
     bool Bitset_Set(const Bitset& bitset, size_t index, bool value);
     bool Bitset_Get(const Bitset& bitset, size_t index, bool& out);
-    bool Bitset_Flip(Bitset& bitset, size_t index);
+    bool Bitset_Flip(const Bitset& bitset, size_t index);
 }

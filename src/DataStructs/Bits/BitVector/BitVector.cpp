@@ -31,8 +31,8 @@ namespace Horizon::Bits {
     {
         if (newCapacity <= bitVector.capacity) return true;
 
-        size_t oldBlocks = BitsToBlocks(bitVector.capacity);
-        size_t newBlocks = BitsToBlocks(newCapacity);
+        const size_t oldBlocks = BitsToBlocks(bitVector.capacity);
+        const size_t newBlocks = BitsToBlocks(newCapacity);
 
         void* mem = realloc(bitVector.bitset.blocks, newBlocks * sizeof(uint64_t));
         if (!mem) return false;
@@ -45,13 +45,13 @@ namespace Horizon::Bits {
         return true;
     }
 
-    bool BitVector_AppendBit(BitVector& bitVector, const bool value, bool& out)
+    bool BitVector_PushBack(BitVector& bitVector, const bool value, bool& out)
     {
         const size_t index = bitVector.size;
         if (index >= bitVector.capacity)
         {
-            const size_t newCap = (bitVector.capacity == 0) ? 64 : bitVector.capacity * 2;
-            if (!BitVector_Reserve(bitVector, newCap)) return false;
+            const size_t newCapacity = (bitVector.capacity == 0) ? 64 : bitVector.capacity * 2;
+            if (!BitVector_Reserve(bitVector, newCapacity)) return false;
         }
 
         bitVector.size++;

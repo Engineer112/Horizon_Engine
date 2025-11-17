@@ -128,10 +128,10 @@ TEST(BitVector, AppendBit_ExpandsCapacity)
     bool out = false;
 
     // Act
-    EXPECT_TRUE(BitVector_AppendBit(bitVector, true, out));
+    EXPECT_TRUE(BitVector_PushBack(bitVector, true, out));
     EXPECT_TRUE(out);
 
-    EXPECT_TRUE(BitVector_AppendBit(bitVector, false, out));
+    EXPECT_TRUE(BitVector_PushBack(bitVector, false, out));
     EXPECT_FALSE(out);
 
     // Assert
@@ -155,7 +155,7 @@ TEST(BitVector, AppendBit_MultipleGrowthCycles)
     for (int i = 0; i < 1000; ++i)
     {
         bool val = (i % 2 == 0);
-        EXPECT_TRUE(BitVector_AppendBit(bitVector, val, out));
+        EXPECT_TRUE(BitVector_PushBack(bitVector, val, out));
         EXPECT_EQ(out, val);
     }
 

@@ -62,7 +62,7 @@ namespace Horizon::Bits {
         return true;
     }
 
-    bool Bitset_Flip(Bitset& bitset, const size_t index)
+    bool Bitset_Flip(const Bitset& bitset, const size_t index)
     {
         if (!bitset.blocks || index >= bitset.numBits) return false;
 

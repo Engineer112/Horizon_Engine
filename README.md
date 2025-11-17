@@ -12,7 +12,7 @@ then you can call:
 ```
 to clone the repo
 ## layout
-all sets of .h and .cpp files are grouped into there own folder with the title of the data type as its name
+all sets of .h and .cpp files are grouped into their own folder with the title of the data type as its name
 ### Directories
 * src
   * datastructs: data structs used throughout program
