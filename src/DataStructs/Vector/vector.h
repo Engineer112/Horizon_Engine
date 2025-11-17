@@ -28,6 +28,9 @@ bool Vector_Init(Vector<T> &vector, size_t capacity) {
 template<typename T>
 void Vector_Free(Vector<T> &vector) {
     free(vector.data);
+    vector.data = nullptr;
+    vector.size = 0;
+    vector.capacity = 0;
 }
 
 // -- Memory Ops --
@@ -62,23 +65,30 @@ bool Vector_PushBack(Vector<T> &vector, const T &value) {
 
 template<typename T>
 inline bool Vector_PopBack(Vector<T>& vector) {
-    if (!vector.data && vector.size > 0) {
+    if (vector.size == 0) {
         return false;
     }
+
     --vector.size;
     return true;
 }
 
 template<typename T>
-bool Vector_PopBack(Vector<T> &vector, T &out) {
-    const bool result = Vector_PopBack(vector);
-    out = vector.data[vector.size];
-    return result;
+bool Vector_PopBack(Vector<T>& vector, T& out) {
+    if (vector.size == 0) {
+        return false;
+    }
+
+    out = vector.data[vector.size - 1];
+    --vector.size;
+
+    return true;
 }
+
 
 template<typename T>
 bool Vector_At(Vector<T> &vector, size_t index, T &value) {
-    if (index >= vector.size && !vector.data)
+    if (index >= vector.size || !vector.data)
         return false;
     value = vector.data[index];
     return true;

@@ -277,3 +277,135 @@ TEST(Vector, Front_FailsOnEmptyVector) {
 
     Vector_Free(vector);
 }
+
+TEST(Vector, Reserve_ShrinkBehavior_IsSafe) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 16));
+
+    ASSERT_TRUE(Vector_Reserve(vector, 64));
+
+    const size_t requested = 8;
+    bool ok = Vector_Reserve(vector, requested);
+    EXPECT_TRUE(!ok || vector.capacity == 64);
+    Vector_Free(vector);
+}
+
+TEST(Vector, Reserve_Zero_IsSafe) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 8));
+
+    EXPECT_TRUE(Vector_Reserve(vector, 0));
+    EXPECT_TRUE(vector.capacity == 8); // reserving 0 shouldn't do anything
+
+    Vector_Free(vector);
+}
+
+TEST(Vector, PushBack_AutoGrowth_PreservesElements) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 2));
+
+    EXPECT_TRUE(Vector_PushBack(vector, 10));
+    EXPECT_TRUE(Vector_PushBack(vector, 20));
+    // should trigger growth
+    EXPECT_TRUE(Vector_PushBack(vector, 30));
+
+    EXPECT_GE(vector.capacity, 3u);
+    EXPECT_EQ(vector.size, 3u);
+    EXPECT_EQ(vector.data[0], 10);
+    EXPECT_EQ(vector.data[1], 20);
+    EXPECT_EQ(vector.data[2], 30);
+
+    Vector_Free(vector);
+}
+
+TEST(Vector, PushBack_OnUninitializedVector_DoesNotCrash) {
+    Vector<int> vector{};
+
+    bool ok = Vector_PushBack(vector, 42);
+    EXPECT_TRUE(ok == true || ok == false);
+    if (vector.data) {
+        Vector_Free(vector);
+    }
+}
+
+TEST(Vector, PopBack_OnEmptyVector_FailsGracefully) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 8));
+
+    int out;
+    EXPECT_FALSE(Vector_PopBack(vector, out));
+    EXPECT_EQ(vector.size, 0u);
+
+    Vector_Free(vector);
+}
+
+TEST(Vector, At_OutOfBounds_Fails) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 8));
+
+    Vector_PushBack(vector, 1);
+    Vector_PushBack(vector, 2);
+
+    int out;
+    EXPECT_FALSE(Vector_At(vector, vector.size, out));
+    EXPECT_FALSE(Vector_At(vector, static_cast<size_t>(-1), out));
+
+    Vector_Free(vector);
+}
+
+TEST(Vector, Front_FailsAfterEmptying) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 8));
+
+    Vector_PushBack(vector, 7);
+    int* outPtr = nullptr;
+    EXPECT_TRUE(Vector_Front(vector, outPtr));
+    EXPECT_NE(outPtr, nullptr);
+
+    int tmp;
+    EXPECT_TRUE(Vector_PopBack(vector, tmp));
+    // Now empty
+    EXPECT_FALSE(Vector_Front(vector, outPtr));
+    EXPECT_EQ(outPtr, nullptr);
+
+    Vector_Free(vector);
+}
+
+TEST(Vector, Free_CanBeCalledTwice_IsSafe) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 8));
+    Vector_PushBack(vector, 1);
+    Vector_Free(vector);
+
+    EXPECT_EQ(vector.data, nullptr);
+    EXPECT_EQ(vector.size, 0u);
+    EXPECT_EQ(vector.capacity, 0u);
+
+    Vector_Free(vector);
+
+    EXPECT_EQ(vector.data, nullptr);
+    EXPECT_EQ(vector.size, 0u);
+    EXPECT_EQ(vector.capacity, 0u);
+}
+
+TEST(Vector, InterleavedOperations_PreserveOrdering) {
+    Vector<int> vector;
+    ASSERT_TRUE(Vector_Init(vector, 2));
+
+    EXPECT_TRUE(Vector_PushBack(vector, 10));
+    EXPECT_TRUE(Vector_PushBack(vector, 20));
+    EXPECT_TRUE(Vector_PushBack(vector, 30));
+
+    int out;
+    EXPECT_TRUE(Vector_PopBack(vector, out));
+    EXPECT_EQ(out, 30);
+
+    EXPECT_TRUE(Vector_PushBack(vector, 40));
+
+    EXPECT_EQ(vector.size, 3u);
+    EXPECT_EQ(vector.data[0], 10);
+    EXPECT_EQ(vector.data[1], 20);
+    EXPECT_EQ(vector.data[2], 40);
+
+    Vector_Free(vector);
+}
